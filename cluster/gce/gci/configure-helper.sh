@@ -1675,6 +1675,12 @@ function override-kubectl {
     echo "export PATH=${KUBE_HOME}/bin:\$PATH" > /etc/profile.d/kube_env.sh
 }
 
+function kill-google-ip-forwarding-daemon {
+    echo "Stopping Google IP Forwarding Daemon"
+    systemctl stop google-ip-forwarding-daemon
+    ip route del $(ip route show table local proto 66)
+}
+
 ########### Main Function ###########
 echo "Start to configure instance for kubernetes"
 
@@ -1703,6 +1709,7 @@ KUBE_CONTROLLER_MANAGER_TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | 
 KUBE_SCHEDULER_TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/" | dd bs=32 count=1 2>/dev/null)
 
 setup-os-params
+kill-google-ip-forwarding-daemon
 config-ip-firewall
 create-dirs
 setup-kubelet-dir
